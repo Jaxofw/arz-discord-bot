@@ -12,9 +12,7 @@ module.exports = {
         const serverInfoEmbed = {
             color: 0x27A724,
             description: '"**ARZ**" has long evolved past the original mod, we are now a team of people who have come together to bring you guys new experiences, and ways to play Call of Duty the way you love.\n\nWe have big plans to bring you guys more and more. We are working around the clock to not only improve on existing projects of ours, but also future projects as well.\n\u200B\nIf we ever decide to bring any of our projects back, or have any information regarding ARZ as a whole, you can expect to find it here.\n\nIf you\'re having issues and are looking to report a bug or player, please refer to <#1068974915555954779>.\n\nIf you\'re stuck and need help, please refer to our tutorials found in <#1068969262519169215>.\n\u200B\n',
-            thumbnail: {
-                url: 'http://arz.gg/assets/arz.png',
-            },
+            thumbnail: { url: 'http://arz.gg/assets/arz.png' },
             fields: [
                 { name: 'IW4x', value: '\u200B' },
                 { name: '[US] ARZ TDM #1', value: '', inline: true },
@@ -28,9 +26,7 @@ module.exports = {
                 { name: '[US] JAM FFA #1', value: '', inline: true },
                 { name: '[US] JAM FFA #2', value: '', inline: true },
             ],
-            footer: {
-                text: '',
-            },
+            footer: { text: '' },
         };
 
         const updateCache = async () => {
