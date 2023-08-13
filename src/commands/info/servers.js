@@ -101,9 +101,7 @@ module.exports = {
             }
         };
 
-        const updateTimestamp = () => {
-            timestamp = new Date().toLocaleTimeString('en-US');
-        };
+        const updateTimestamp = () => timestamp = new Date().toLocaleTimeString('en-US');
 
         setInterval(updateTimestamp, 1000);
         setInterval(updateCache, 5000);
