@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Provides information about the game servers.'),
     async execute(interaction) {
         const cache = [];
-        let initialEmbed, timestamp;
+        let initialEmbed;
 
         const serverInfoEmbed = {
             color: 0x27A724,
@@ -26,7 +26,6 @@ module.exports = {
                 { name: '[US] JAM FFA #1', value: '', inline: true },
                 { name: '[US] JAM FFA #2', value: '', inline: true },
             ],
-            footer: { text: '' },
         };
 
         const updateCache = async () => {
@@ -44,18 +43,13 @@ module.exports = {
 
         const updateEmbed = () => {
             if (cache.servers.length > 0) {
-                const { fields, footer } = serverInfoEmbed;
-
                 // update map and player count
                 cache.servers.map(function ({ serverName, clientNum, maxClients, currentMap }) {
-                    fields.forEach(field => {
+                    serverInfoEmbed.fields.forEach(field => {
                         if (serverName != field.name) return;
                         field.value = 'Map: ``' + currentMap.alias + '``\nPlayers: ``' + clientNum + '/' + maxClients + '``';
                     });
                 });
-
-                // update timestamp
-                footer.text = `Last Updated • Today at ${timestamp}`;
 
                 if (!initialEmbed) {
                     interaction.channel.send({ embeds: [serverInfoEmbed] })
@@ -101,9 +95,6 @@ module.exports = {
             }
         };
 
-        const updateTimestamp = () => timestamp = new Date().toLocaleTimeString('en-US');
-
-        setInterval(updateTimestamp, 1000);
         setInterval(updateCache, 5000);
         setInterval(checkForActiveServer, 1000 * 60 * 60);
 
