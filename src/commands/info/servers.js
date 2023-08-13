@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Provides information about the game servers.'),
     async execute(interaction) {
         const cache = [];
-        let initialEmbed;
+        let initialEmbed, timestamp;
 
         const serverInfoEmbed = {
             color: 0x27A724,
@@ -55,7 +55,7 @@ module.exports = {
                 });
 
                 // update timestamp
-                footer.text = `Last Updated • Today at ${new Date().toLocaleTimeString('en-US')}`;
+                footer.text = `Last Updated • Today at ${timestamp}`;
 
                 if (!initialEmbed) {
                     interaction.channel.send({ embeds: [serverInfoEmbed] })
@@ -101,6 +101,11 @@ module.exports = {
             }
         };
 
+        const updateTimestamp = () => {
+            timestamp = new Date().toLocaleTimeString('en-US');
+        };
+
+        setInterval(updateTimestamp, 1000);
         setInterval(updateCache, 5000);
         setInterval(checkForActiveServer, 1000 * 60 * 60);
 
