@@ -1,7 +1,5 @@
-require('dotenv').config();
-
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const { token } = process.env;
+const { token } = require('../config.json');
 
 // Create a new client instance
 const client = new Client({
