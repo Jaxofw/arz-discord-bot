@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -29,16 +29,13 @@ module.exports = {
         };
 
         const updateCache = async () => {
-            fetch('http://arz.gg:1624/api/server')
-                .then(response => response.json())
-                .then(servers => {
-                    cache.servers = servers;
-                    updateEmbed();
-                })
-                .catch(error => {
-                    cache.servers = [];
-                    console.error(error);
-                });
+            try {
+                const response = await fetch('http://arz.gg:1624/api/server');
+                cache.servers = await response.json();
+                updateEmbed();
+            } catch (error) {
+                console.log(error);
+            }
         };
 
         const updateEmbed = () => {
