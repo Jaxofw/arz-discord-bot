@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const axios = require('axios');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -30,8 +30,8 @@ module.exports = {
 
         const updateCache = async () => {
             try {
-                const response = await fetch('http://arz.gg:1624/api/server');
-                cache.servers = await response.json();
+                const response = await axios.get('http://arz.gg:1624/api/server', { signal: AbortSignal.timeout(300000) });
+                cache.servers = response.data;
                 updateEmbed();
             } catch (error) {
                 console.log(error);
