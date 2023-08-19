@@ -1,12 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
+const accurateInterval = require('accurate-interval');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('servers')
         .setDescription('Provides information about the game servers.'),
     async execute(interaction) {
-        const cache = [];
+        let servers = [];
         let initialEmbed;
 
         const serverInfoEmbed = {
@@ -26,12 +27,13 @@ module.exports = {
                 { name: '[US] JAM FFA #1', value: '', inline: true },
                 { name: '[US] JAM FFA #2', value: '', inline: true },
             ],
+            footer: { text: '' },
         };
 
         const updateCache = async () => {
             try {
                 const response = await axios.get('http://arz.gg:1624/api/server', { signal: AbortSignal.timeout(300000) });
-                cache.servers = response.data;
+                servers = response.data;
                 updateEmbed();
             } catch (error) {
                 console.log(error);
@@ -39,46 +41,48 @@ module.exports = {
         };
 
         const updateEmbed = () => {
-            if (cache.servers.length > 0) {
-                // update map and player count
-                cache.servers.map(function ({ serverName, clientNum, maxClients, currentMap }) {
-                    serverInfoEmbed.fields.forEach(field => {
-                        if (serverName != field.name) return;
-                        field.value = 'Map: ``' + currentMap.alias + '``\nPlayers: ``' + clientNum + '/' + maxClients + '``';
-                    });
-                });
-
-                if (!initialEmbed) {
-                    interaction.channel.send({ embeds: [serverInfoEmbed] })
-                        .then(embed => initialEmbed = embed)
-                        .catch(error => console.error(error));
-                } else {
-                    initialEmbed.edit({ embeds: [serverInfoEmbed] })
-                        .catch(error => {
-                            initialEmbed = undefined;
-                            console.error(error);
-                        });
-                }
-            } else {
+            if (servers.length <= 0) {
                 console.error('ERROR: Failed to update embed missing server data');
+                return;
+            }
+
+            // update map and player count
+            servers.map(function ({ serverName, clientNum, maxClients, currentMap }) {
+                serverInfoEmbed.fields.forEach(field => {
+                    if (serverName != field.name) return;
+                    field.value = 'Map: ``' + currentMap.alias + '``\nPlayers: ``' + clientNum + '/' + maxClients + '``';
+                });
+            });
+
+            // update timestamp
+            serverInfoEmbed.footer.text = `Last Updated • Today at ${new Date().toLocaleTimeString('en-US')}`;
+
+            if (!initialEmbed) {
+                interaction.channel.send({ embeds: [serverInfoEmbed] })
+                    .then(embed => initialEmbed = embed)
+                    .catch(error => console.error(error));
+            } else {
+                initialEmbed.edit({ embeds: [serverInfoEmbed] })
+                    .catch(error => console.error(error));
             }
         };
 
         const checkForActiveServer = () => {
-            if (cache.servers.length > 0) {
-                cache.servers.map(function ({ serverName, game, clientNum, currentMap }) {
-                    if (clientNum < 5) return;
-
-                    const pingRole = getGamePingRole(game);
-
-                    pingRole ? interaction.guild.channels.cache
-                        .get('1100821720136437781')
-                        .send({ content: `<@&${pingRole}>, **${serverName}** is active with **${clientNum} players** on ${currentMap.alias}!` }) :
-                        console.error(`ERROR: Failed to ping for active server ${serverName} missing game role.`);
-                });
-            } else {
+            if (servers.length <= 0) {
                 console.error('ERROR: Failed to check for active servers missing server data');
+                return;
             }
+
+            servers.map(function ({ serverName, game, clientNum, currentMap }) {
+                if (clientNum < 5) return;
+
+                const pingRole = getGamePingRole(game);
+
+                pingRole ? interaction.guild.channels.cache
+                    .get('1100821720136437781')
+                    .send({ content: `<@&${pingRole}>, **${serverName}** is active with **${clientNum} players** on ${currentMap.alias}!` }) :
+                    console.error(`ERROR: Failed to ping for active server ${serverName} missing game role.`);
+            });
         };
 
         const getGamePingRole = (game) => {
@@ -92,8 +96,8 @@ module.exports = {
             }
         };
 
-        setInterval(updateCache, 5000);
-        setInterval(checkForActiveServer, 1000 * 60 * 60);
+        accurateInterval(updateCache, 10000, { aligned: true, immediate: true });
+        accurateInterval(checkForActiveServer, 1000 * 60 * 60, { aligned: true, immediate: true });
 
         await interaction.reply({
             content: 'Servers command executed successfully!', ephemeral: true
