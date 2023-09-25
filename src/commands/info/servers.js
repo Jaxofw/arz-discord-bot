@@ -16,16 +16,17 @@ module.exports = {
             thumbnail: { url: 'http://arz.gg/assets/arz.png' },
             fields: [
                 { name: 'IW4x', value: '\u200B' },
-                { name: '[US] ARZ TDM #1', value: '', inline: true },
+                { name: '[US] ARZ TDM', value: '', inline: true },
                 { name: '[US] ARZ TDM #2', value: '', inline: true },
+                { name: '[US] ARZ Bots', value: '', inline: true },
                 { name: '\u200B', value: '\u200B' },
                 { name: 'Plutonium IW5', value: '\u200B' },
-                { name: '[US] JAM TDM #1', value: '', inline: true },
+                { name: '[US] JAM TDM', value: '', inline: true },
                 { name: '[US] JAM TDM #2', value: '', inline: true },
-                { name: '\u200B', value: '\u200B', inline: true },
-                { name: '[US] JAM TDM #3', value: '', inline: true },
-                { name: '[US] JAM FFA #1', value: '', inline: true },
-                { name: '[US] JAM FFA #2', value: '', inline: true },
+                { name: '[US] JAM TDM | TACS', value: '', inline: true },
+                { name: '[US] JAM Bots', value: '', inline: true },
+                { name: '[US] JAM FFA', value: '', inline: true },
+                { name: '[US] JAM FFA | TACS', value: '', inline: true },
             ],
             footer: { text: '' },
         };
@@ -73,16 +74,16 @@ module.exports = {
                 return;
             }
 
-            servers.map(function ({ serverName, game, clientNum, currentMap }) {
-                if (clientNum < 5) return;
+            servers
+                .filter(({ serverName, clientNum }) => { serverName != '[US] JAM Tourney' && clientNum >= 5; })
+                .map(function ({ serverName, game, clientNum, currentMap }) {
+                    const pingRole = getGamePingRole(game);
 
-                const pingRole = getGamePingRole(game);
-
-                pingRole ? interaction.guild.channels.cache
-                    .get('1100821720136437781')
-                    .send({ content: `<@&${pingRole}>, **${serverName}** is active with **${clientNum} players** on ${currentMap.alias}!` }) :
-                    console.error(`ERROR: Failed to ping for active server ${serverName} missing game role.`);
-            });
+                    pingRole ? interaction.guild.channels.cache
+                        .get('1100821720136437781')
+                        .send({ content: `<@&${pingRole}>, **${serverName}** is active with **${clientNum} players** on ${currentMap.alias}!` }) :
+                        console.error(`ERROR: Failed to ping for active server ${serverName} missing game role.`);
+                });
         };
 
         const getGamePingRole = (game) => {
